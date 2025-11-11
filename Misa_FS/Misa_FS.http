@@ -1,0 +1,6 @@
+@Misa_FS_HostAddress = http://localhost:5209
+
+GET {{Misa_FS_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

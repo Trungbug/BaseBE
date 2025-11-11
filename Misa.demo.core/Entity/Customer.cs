@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Misa.demo.core.Entity
+{
+    [Table("customer")]
+    public class Customer
+    {
+        [Column("customer_id")]
+        public Guid CustomerId { get; set; }
+        [Column("customer_name")]
+        public string? CustomerName { get; set; }
+        [Column("customer_addr")]
+        public string? CustomerAddr { get; set; }
+    }
+}
