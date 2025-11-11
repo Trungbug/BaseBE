@@ -6,43 +6,142 @@ using System.Text;
 using System.Threading.Tasks;
 using MySqlConnector;
 using Microsoft.Extensions.Configuration;
-
+using Dapper; // Đảm bảo đã thêm Dapper
 
 namespace Misa.infrsatructure.Repository
 {
     public class BaseRepo<T> : IBaseRepo<T>
     {
-        protected readonly string connectionString;
 
+        protected readonly string _connectionString;
 
         public BaseRepo(IConfiguration config)
         {
-            connectionString = config.GetConnectionString("ConnectionString");
+            _connectionString = config.GetConnectionString("ConnectionString");
         }
 
-        public int Delete(Guid id)
-        {
-            throw new NotImplementedException();
-        }
 
-        public T Get(Guid id)
+        protected MySqlConnection GetOpenConnection()
         {
-            throw new NotImplementedException();
+            var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            return connection;
         }
 
         public IEnumerable<T> GetAll()
         {
-            throw new NotImplementedException();
+            using (var connection = GetOpenConnection())
+            {
+                var tableName = ToSnakeCase(typeof(T).Name);
+                var sql = $"SELECT * FROM {tableName}";
+                var data = connection.Query<T>(sql);
+                return data;
+            }
         }
 
-        public int Insert(T enity)
+        public T Get(Guid id)
         {
-            throw new NotImplementedException();
+            using (var connection = GetOpenConnection())
+            {
+                var tableName = ToSnakeCase(typeof(T).Name);
+                var idColumn = GetIdColumnName();
+                var sql = $"SELECT * FROM {tableName} WHERE {idColumn} = @Id";
+                var data = connection.QueryFirstOrDefault<T>(sql, new { Id = id });
+                return data;
+            }
         }
 
-        public int Update(T enity, Guid id)
+        public int Insert(T entity)
         {
-            throw new NotImplementedException();
+            using (var connection = GetOpenConnection())
+            {
+                var properties = typeof(T).GetProperties();
+                var tableName = ToSnakeCase(typeof(T).Name);
+
+                var columns = "";
+                var values = "";
+                var parameters = new DynamicParameters();
+
+                foreach (var prop in properties)
+                {
+                    var columnName = ToSnakeCase(prop.Name);
+                    columns += $"{columnName},";
+                    values += $"@{prop.Name},";
+                    parameters.Add($"@{prop.Name}", prop.GetValue(entity));
+                }
+
+                columns = columns.TrimEnd(',');
+                values = values.TrimEnd(',');
+                var sql = $@"INSERT INTO {tableName} ({columns}) VALUES ({values})";
+                var res = connection.Execute(sql, param: parameters);
+                return res;
+            }
+        }
+
+        public int Update(T entity, Guid id)
+        {
+            using (var connection = GetOpenConnection())
+            {
+                var properties = typeof(T).GetProperties();
+                var tableName = ToSnakeCase(typeof(T).Name);
+
+                var setClause = "";
+                var parameters = new DynamicParameters();
+                var idColumn = GetIdColumnName();
+                parameters.Add("@Id", id);
+
+                foreach (var prop in properties)
+                {
+                    var columnName = ToSnakeCase(prop.Name);
+
+                    if (string.Equals(columnName, idColumn, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    setClause += $"{columnName} = @{prop.Name},";
+                    parameters.Add($"@{prop.Name}", prop.GetValue(entity));
+                }
+
+                setClause = setClause.TrimEnd(',');
+                var sql = $@"UPDATE {tableName} SET {setClause} WHERE {idColumn} = @Id";
+                var res = connection.Execute(sql, param: parameters);
+                return res;
+            }
+        }
+
+        public int Delete(Guid id)
+        {
+            using (var connection = GetOpenConnection())
+            {
+                var tableName = ToSnakeCase(typeof(T).Name);
+                var idColumn = GetIdColumnName();
+
+                var sql = $@"DELETE FROM {tableName} WHERE {idColumn} = @Id";
+                var res = connection.Execute(sql, new { Id = id });
+                return res;
+            }
+        }
+
+        private string GetIdColumnName()
+        {
+            var idProp = typeof(T).GetProperties().FirstOrDefault(p => p.Name.ToLower().EndsWith("id"));
+            if (idProp == null)
+            {
+
+                return "id";
+            }
+            return ToSnakeCase(idProp.Name);
+        }
+
+
+        private string ToSnakeCase(string name)
+        {
+            return string.Concat(
+                name.Select((c, i) => i > 0 && char.IsUpper(c)
+                    ? "_" + char.ToLower(c)
+                    : char.ToLower(c).ToString())
+            );
         }
     }
 }

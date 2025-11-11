@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Misa_FS.Model;
+using Misa.demo.core.Entity;
+using Misa.demo.core.Interface.Service;
 
 namespace Misa_FS.Controllers
 {
@@ -7,6 +8,9 @@ namespace Misa_FS.Controllers
     [ApiController]
     public class CustomerController : MSBaseController<Customer>
     {
-        
+        public CustomerController(IBaseService<Customer> baseService) : base(baseService)
+        {
+
+        }
     }
 }

@@ -1,4 +1,6 @@
 using Misa.demo.core.Interface.Repository;
+using Misa.demo.core.Interface.Service;
+using Misa.demo.core.Service;
 using Misa.infrsatructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
+builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 
 var app = builder.Build();
 
