@@ -2,6 +2,7 @@ using Misa.demo.core.Interface.Repository;
 using Misa.demo.core.Interface.Service;
 using Misa.demo.core.Service;
 using Misa.infrsatructure.Repository;
+using Misa_FS.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
 }
 
 app.UseHttpsRedirection();

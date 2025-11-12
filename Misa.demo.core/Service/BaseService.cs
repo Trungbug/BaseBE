@@ -1,4 +1,5 @@
-﻿using Misa.demo.core.Interface.Repository;
+﻿using Misa.demo.core.Exceptions;
+using Misa.demo.core.Interface.Repository;
 using Misa.demo.core.Interface.Service;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Misa.demo.core.Service
 {
     public class BaseService<T>: IBaseService<T>
     {
-        readonly IBaseRepo<T> _baseRepo;
+        protected readonly IBaseRepo<T> _baseRepo;
         public BaseService(IBaseRepo<T> baseRepo) { 
                 _baseRepo = baseRepo;
         }
@@ -22,28 +23,36 @@ namespace Misa.demo.core.Service
         public T Get(Guid id)
         {
             var entity= _baseRepo.Get(id);
+            if(entity == null)
+            {
+                throw new NotFoundException($"Không tìm thấy tài nguyên có id <{id}>");
+            }
             return entity;
         }
 
         public T GetById(Guid id)
         {
-            throw new NotImplementedException();
+            return Get(id);
         }
 
         public int Insert(T entity)
         {
             Validate(entity, "Insert");
-            return _baseRepo.Insert(entity);
+           return _baseRepo.Insert(entity);
         }
 
         public int Update(T entity, Guid id)
         {
+            Get(id);
+
             Validate(entity, "Update");
             return _baseRepo.Update(entity, id);
         }
 
         public int Delete(Guid id)
         {
+            Get(id); 
+
             return _baseRepo.Delete(id);
         }
 

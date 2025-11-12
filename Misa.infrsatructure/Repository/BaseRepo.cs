@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using MySqlConnector;
 using Microsoft.Extensions.Configuration;
-using Dapper; // Đảm bảo đã thêm Dapper
+using Dapper;
+using Misa.demo.core.Exceptions; // Đảm bảo đã thêm Dapper
 
 namespace Misa.infrsatructure.Repository
 {
@@ -53,28 +54,42 @@ namespace Misa.infrsatructure.Repository
 
         public int Insert(T entity)
         {
-            using (var connection = GetOpenConnection())
+            // Bọc code của bạn trong try-catch
+            try
             {
-                var properties = typeof(T).GetProperties();
-                var tableName = ToSnakeCase(typeof(T).Name);
-
-                var columns = "";
-                var values = "";
-                var parameters = new DynamicParameters();
-
-                foreach (var prop in properties)
+                using (var connection = GetOpenConnection())
                 {
-                    var columnName = ToSnakeCase(prop.Name);
-                    columns += $"{columnName},";
-                    values += $"@{prop.Name},";
-                    parameters.Add($"@{prop.Name}", prop.GetValue(entity));
-                }
+                    var properties = typeof(T).GetProperties();
+                    var tableName = ToSnakeCase(typeof(T).Name);
 
-                columns = columns.TrimEnd(',');
-                values = values.TrimEnd(',');
-                var sql = $@"INSERT INTO {tableName} ({columns}) VALUES ({values})";
-                var res = connection.Execute(sql, param: parameters);
-                return res;
+                    var columns = "";
+                    var values = "";
+                    var parameters = new DynamicParameters();
+
+                    foreach (var prop in properties)
+                    {
+                        var columnName = ToSnakeCase(prop.Name);
+                        columns += $"{columnName},";
+                        values += $"@{prop.Name},";
+                        parameters.Add($"@{prop.Name}", prop.GetValue(entity));
+                    }
+
+                    columns = columns.TrimEnd(',');
+                    values = values.TrimEnd(',');
+                    var sql = $@"INSERT INTO {tableName} ({columns}) VALUES ({values})";
+                    var res = connection.Execute(sql, param: parameters);
+                    return res;
+                }
+            }
+            // Bắt lỗi cụ thể của MySQL
+            catch (MySqlException ex)
+            {
+                if (ex.Number == 1062) // 1062 = Duplicate Entry
+                {
+                    // Ném ra lỗi nghiệp vụ mà Service hiểu được
+                    throw new ValidationException("Mã đã tồn tại trong hệ thống.");
+                }
+                throw; // Ném các lỗi MySQL khác
             }
         }
 
