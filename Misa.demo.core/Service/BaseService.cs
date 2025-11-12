@@ -32,19 +32,34 @@ namespace Misa.demo.core.Service
 
         public int Insert(T entity)
         {
-            throw new NotImplementedException();
+            Validate(entity, "Insert");
+            return _baseRepo.Insert(entity);
         }
 
         public int Update(T entity, Guid id)
         {
-            throw new NotImplementedException();
+            Validate(entity, "Update");
+            return _baseRepo.Update(entity, id);
         }
 
         public int Delete(Guid id)
         {
-            throw new NotImplementedException();
+            return _baseRepo.Delete(id);
         }
 
-        
+
+        /// <summary>
+        /// Hàm validate chung, các Service con (như CustomerService)
+        /// có thể override để thêm logic validate cụ thể.
+        /// </summary>
+        /// <param name="entity">Đối tượng</param>
+        /// <param name="mode">"Insert" hay "Update"</param>
+        protected virtual void Validate(T entity, string mode)
+        {
+            // Nơi để logic validate chung
+            // Ví dụ: kiểm tra các trường bắt buộc chung...
+            // Hoặc tốt hơn là dùng FluentValidation (xem mục 4)
+        }
+
     }
 }
