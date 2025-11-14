@@ -46,14 +46,14 @@ namespace Misa_FS.Middleware
                     errorResponse.Message = ex.Message;
                     break;
                 default:
-                    response.StatusCode = (int)HttpStatusCode.InternalServerError; // 500
+                    response.StatusCode = (int)HttpStatusCode.InternalServerError; 
                     errorResponse.Message = "Lỗi hệ thống, vui lòng liên hệ Misa!";
                     break;
             }
 
             var result = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase // Giống project tham khảo
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase 
             });
             await context.Response.WriteAsync(result);
         }
