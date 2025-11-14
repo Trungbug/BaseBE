@@ -25,15 +25,15 @@ namespace Misa_FS.Controllers
             return StatusCode(201, ServiceResponse<int>.Ok(res, "Thêm mới thành công"));
         }
 
-        [HttpGet]
-        public IActionResult Get()
-        {
-            var data = _baseService.GetAll();
-            return Ok(ServiceResponse<IEnumerable<T>>.Ok(data, "Lấy dữ liệu thành công"));
-        }
+        //[HttpGet]
+        //public IActionResult Get()
+        //{
+        //    var data = _baseService.GetAll();
+        //    return Ok(ServiceResponse<IEnumerable<T>>.Ok(data, "Lấy dữ liệu thành công"));
+        //}
 
-        [HttpPut]
-        public IActionResult Put(T entity, [FromRoute] Guid id)
+        [HttpPut("{id}")]
+        public IActionResult Put([FromBody] T entity, [FromRoute] Guid id) 
         {
             var res = _baseService.Update(entity, id);
             return Ok(ServiceResponse<int>.Ok(res, "Cập nhật thành công"));
