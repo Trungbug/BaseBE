@@ -1,9 +1,11 @@
-﻿using Misa.demo.core.Exceptions;
+﻿using Misa.demo.core.Attibute;
+using Misa.demo.core.Exceptions;
 using Misa.demo.core.Interface.Repository;
 using Misa.demo.core.Interface.Service;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,9 +67,32 @@ namespace Misa.demo.core.Service
         /// <param name="mode">"Insert" hay "Update"</param>
         protected virtual void Validate(T entity, string mode)
         {
-            // Nơi để logic validate chung
-            // Ví dụ: kiểm tra các trường bắt buộc chung...
-            // Hoặc tốt hơn là dùng FluentValidation (xem mục 4)
+            var props = entity.GetType().GetProperties();
+
+            foreach (var prop in props)
+            {
+                var propValue = prop.GetValue(entity);
+
+                // 1. Kiểm tra [NotEmpty]
+                var notEmptyAttr = prop.GetCustomAttribute<NotEmptyAttribute>();
+                if (notEmptyAttr != null)
+                {
+                    if (propValue == null || string.IsNullOrEmpty(propValue.ToString()))
+                    {
+                        throw new ValidationException(notEmptyAttr.ErrorMessage);
+                    }
+                }
+
+                // 2. Kiểm tra [MaxLength] (MỚI)
+                var maxLengthAttr = prop.GetCustomAttribute<MaxLengthAttribute>();
+                if (maxLengthAttr != null && propValue != null)
+                {
+                    if (propValue.ToString().Length > maxLengthAttr.Length)
+                    {
+                        throw new ValidationException(maxLengthAttr.ErrorMessage);
+                    }
+                }
+            }
         }
 
     }

@@ -55,6 +55,7 @@ namespace Misa.infrsatructure.Repository
         public int Insert(T entity)
         {
             // Bọc code của bạn trong try-catch
+
             try
             {
                 using (var connection = GetOpenConnection())
