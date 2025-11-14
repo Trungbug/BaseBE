@@ -33,25 +33,21 @@ namespace Misa_FS.Middleware
         {
             context.Response.ContentType = "application/json";
             var response = context.Response;
-
-            // Dùng ServiceResponse (Bước 2) để trả về lỗi
             var errorResponse = ServiceResponse<object>.Error(exception.Message);
 
             switch (exception)
             {
                 case ValidationException ex:
-                    response.StatusCode = (int)HttpStatusCode.BadRequest; // 400
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
                     errorResponse.Message = ex.Message;
                     break;
                 case NotFoundException ex:
-                    response.StatusCode = (int)HttpStatusCode.NotFound; // 404
+                    response.StatusCode = (int)HttpStatusCode.NotFound; 
                     errorResponse.Message = ex.Message;
                     break;
                 default:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError; // 500
                     errorResponse.Message = "Lỗi hệ thống, vui lòng liên hệ Misa!";
-                    // (Trong môi trường Dev, bạn có thể trả về ex.Message)
-                    // errorResponse.Message = ex.Message; 
                     break;
             }
 

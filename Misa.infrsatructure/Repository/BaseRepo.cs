@@ -1,26 +1,20 @@
 ﻿using Misa.demo.core.Interface.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MySqlConnector;
 using Microsoft.Extensions.Configuration;
 using Dapper;
-using Misa.demo.core.Exceptions; // Đảm bảo đã thêm Dapper
-
+using Misa.demo.core.Exceptions;
+using System.Reflection; 
+using Misa.demo.core.Attibute; 
 namespace Misa.infrsatructure.Repository
 {
     public class BaseRepo<T> : IBaseRepo<T>
     {
-
         protected readonly string _connectionString;
 
         public BaseRepo(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("ConnectionString");
         }
-
 
         protected MySqlConnection GetOpenConnection()
         {
@@ -33,7 +27,7 @@ namespace Misa.infrsatructure.Repository
         {
             using (var connection = GetOpenConnection())
             {
-                var tableName = ToSnakeCase(typeof(T).Name);
+                var tableName = GetTableName(); // Nâng cấp
                 var sql = $"SELECT * FROM {tableName}";
                 var data = connection.Query<T>(sql);
                 return data;
@@ -44,8 +38,8 @@ namespace Misa.infrsatructure.Repository
         {
             using (var connection = GetOpenConnection())
             {
-                var tableName = ToSnakeCase(typeof(T).Name);
-                var idColumn = GetIdColumnName();
+                var tableName = GetTableName(); 
+                var idColumn = GetPrimaryKeyColumnName(); 
                 var sql = $"SELECT * FROM {tableName} WHERE {idColumn} = @Id";
                 var data = connection.QueryFirstOrDefault<T>(sql, new { Id = id });
                 return data;
@@ -54,73 +48,83 @@ namespace Misa.infrsatructure.Repository
 
         public int Insert(T entity)
         {
-            // Bọc code của bạn trong try-catch
+            
+            CheckUnique(entity); 
 
+            
             try
             {
                 using (var connection = GetOpenConnection())
                 {
                     var properties = typeof(T).GetProperties();
-                    var tableName = ToSnakeCase(typeof(T).Name);
+                    var tableName = GetTableName();
 
-                    var columns = "";
-                    var values = "";
+                    var columns = new List<string>();
+                    var values = new List<string>();
                     var parameters = new DynamicParameters();
 
                     foreach (var prop in properties)
                     {
-                        var columnName = ToSnakeCase(prop.Name);
-                        columns += $"{columnName},";
-                        values += $"@{prop.Name},";
+                        var isPrimaryKey = prop.GetCustomAttribute<PrimaryKeyAttribute>() != null;
+
+                        
+                        if (isPrimaryKey && prop.PropertyType == typeof(Guid))
+                        {
+                            prop.SetValue(entity, Guid.NewGuid());
+                        }
+
+                        var columnName = GetColumnName(prop);
+                        columns.Add(columnName);
+                        values.Add($"@{prop.Name}"); 
                         parameters.Add($"@{prop.Name}", prop.GetValue(entity));
                     }
 
-                    columns = columns.TrimEnd(',');
-                    values = values.TrimEnd(',');
-                    var sql = $@"INSERT INTO {tableName} ({columns}) VALUES ({values})";
+                    var sql = $@"INSERT INTO {tableName} ({string.Join(", ", columns)}) 
+                                 VALUES ({string.Join(", ", values)})";
                     var res = connection.Execute(sql, param: parameters);
                     return res;
                 }
             }
-            // Bắt lỗi cụ thể của MySQL
+            
             catch (MySqlException ex)
             {
-                if (ex.Number == 1062) // 1062 = Duplicate Entry
+                if (ex.Number == 1062) 
                 {
-                    // Ném ra lỗi nghiệp vụ mà Service hiểu được
+                   
                     throw new ValidationException("Mã đã tồn tại trong hệ thống.");
                 }
-                throw; // Ném các lỗi MySQL khác
+                throw; 
             }
         }
 
         public int Update(T entity, Guid id)
         {
+            
+            CheckUnique(entity, id);
+
+            
             using (var connection = GetOpenConnection())
             {
                 var properties = typeof(T).GetProperties();
-                var tableName = ToSnakeCase(typeof(T).Name);
+                var tableName = GetTableName();
+                var idColumn = GetPrimaryKeyColumnName();
 
-                var setClause = "";
+                var setClause = new List<string>();
                 var parameters = new DynamicParameters();
-                var idColumn = GetIdColumnName();
                 parameters.Add("@Id", id);
 
                 foreach (var prop in properties)
                 {
-                    var columnName = ToSnakeCase(prop.Name);
+                    var isPrimaryKey = prop.GetCustomAttribute<PrimaryKeyAttribute>() != null;
+                    if (isPrimaryKey) continue; 
 
-                    if (string.Equals(columnName, idColumn, StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-
-                    setClause += $"{columnName} = @{prop.Name},";
+                    var columnName = GetColumnName(prop);
+                    setClause.Add($"{columnName} = @{prop.Name}");
                     parameters.Add($"@{prop.Name}", prop.GetValue(entity));
                 }
 
-                setClause = setClause.TrimEnd(',');
-                var sql = $@"UPDATE {tableName} SET {setClause} WHERE {idColumn} = @Id";
+                var sql = $@"UPDATE {tableName} SET {string.Join(", ", setClause)} 
+                             WHERE {idColumn} = @Id";
                 var res = connection.Execute(sql, param: parameters);
                 return res;
             }
@@ -130,8 +134,8 @@ namespace Misa.infrsatructure.Repository
         {
             using (var connection = GetOpenConnection())
             {
-                var tableName = ToSnakeCase(typeof(T).Name);
-                var idColumn = GetIdColumnName();
+                var tableName = GetTableName();
+                var idColumn = GetPrimaryKeyColumnName(); 
 
                 var sql = $@"DELETE FROM {tableName} WHERE {idColumn} = @Id";
                 var res = connection.Execute(sql, new { Id = id });
@@ -139,25 +143,106 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
-        private string GetIdColumnName()
+        #region Helper functions (Giống project tham khảo)
+
+        /// <summary>
+        /// Lấy tên bảng (từ Attribute [Table])
+        /// </summary>
+        private string GetTableName()
         {
-            var idProp = typeof(T).GetProperties().FirstOrDefault(p => p.Name.ToLower().EndsWith("id"));
-            if (idProp == null)
+            var tableAttr = typeof(T).GetCustomAttribute<TableAttribute>();
+            if (tableAttr == null)
             {
-
-                return "id";
+                
+                throw new Exception($"Entity {typeof(T).Name} thiếu Attribute [Table(\"...\")]");
+                
             }
-            return ToSnakeCase(idProp.Name);
+            return tableAttr.TableName;
         }
 
-
-        private string ToSnakeCase(string name)
+        /// <summary>
+        /// Lấy tên cột (từ Attribute [ColumnName])
+        /// </summary>
+        private string GetColumnName(PropertyInfo prop)
         {
-            return string.Concat(
-                name.Select((c, i) => i > 0 && char.IsUpper(c)
-                    ? "_" + char.ToLower(c)
-                    : char.ToLower(c).ToString())
-            );
+            var columnAttr = prop.GetCustomAttribute<ColumnNameAttribute>();
+            if (columnAttr == null)
+            {
+                
+                throw new Exception($"Property {prop.Name} của Entity {typeof(T).Name} thiếu Attribute [ColumnName(\"...\")]");
+               
+            }
+            return columnAttr.Name;
         }
+
+        /// <summary>
+        /// Lấy tên cột khóa chính (từ Attribute [PrimaryKey])
+        /// </summary>
+        private string GetPrimaryKeyColumnName()
+        {
+            var pkProp = typeof(T).GetProperties()
+                           .FirstOrDefault(p => p.GetCustomAttribute<PrimaryKeyAttribute>() != null);
+
+            if (pkProp == null)
+            {
+                throw new Exception($"Entity {typeof(T).Name} thiếu Attribute [PrimaryKey]");
+            }
+            
+            return GetColumnName(pkProp);
+        }
+
+        /// <summary>
+        /// (MỚI) Kiểm tra các trường [Unique]
+        /// (Giống CheckCodeExist của project tham khảo)
+        /// </summary>
+        private void CheckUnique(T entity, Guid? id = null)
+        {
+            var tableName = GetTableName();
+
+           
+            var uniqueProps = typeof(T).GetProperties()
+                .Where(p => p.GetCustomAttribute<UniqueAttribute>() != null);
+
+            if (!uniqueProps.Any()) return;
+
+            using (var connection = GetOpenConnection())
+            {
+                foreach (var prop in uniqueProps)
+                {
+                    var uniqueAttr = prop.GetCustomAttribute<UniqueAttribute>();
+                    var columnName = GetColumnName(prop);
+                    var propValue = prop.GetValue(entity);
+
+                    
+                    if (propValue == null || string.IsNullOrEmpty(propValue.ToString()))
+                    {
+                        continue;
+                    }
+
+                    var sqlWhere = $"{columnName} = @PropValue";
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@PropValue", propValue);
+
+                   
+                    if (id != null)
+                    {
+                        var idColumn = GetPrimaryKeyColumnName();
+                        sqlWhere += $" AND {idColumn} <> @Id";
+                        parameters.Add("@Id", id);
+                    }
+
+                    var sql = $"SELECT COUNT(1) FROM {tableName} WHERE {sqlWhere}";
+                    var count = connection.ExecuteScalar<int>(sql, parameters);
+
+                    if (count > 0)
+                    {
+                      
+                        throw new ValidationException(uniqueAttr.ErrorMessage);
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

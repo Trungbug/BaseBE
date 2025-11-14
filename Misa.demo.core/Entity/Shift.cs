@@ -12,18 +12,18 @@ namespace Misa.demo.core.Entity
         public Guid ShiftId { get; set; }
 
         [ColumnName("shift_code")]
-        [NotEmpty("Mã ca không được để trống")] // Yêu cầu 1 
+        [NotEmpty("Mã ca không được để trống")] 
  
-        [Unique("Mã ca đã tồn tại trong hệ thống")] // Yêu cầu 2 
+        [Unique("Mã ca đã tồn tại trong hệ thống")] 
 
-        [MaxLength(20, "Mã ca không được vượt quá 20 ký tự")] // Yêu cầu 3 
+        [MaxLength(20, "Mã ca không được vượt quá 20 ký tự")] 
         public string ShiftCode { get; set; }
 
         [ColumnName("shift_name")]
 
-        [NotEmpty("Tên ca không được để trống")] // Yêu cầu 1 
+        [NotEmpty("Tên ca không được để trống")] 
 
-        [MaxLength(50, "Tên ca không được vượt quá 50 ký tự")] // Yêu cầu 4 
+        [MaxLength(50, "Tên ca không được vượt quá 50 ký tự")] 
         public string ShiftName { get; set; }
 
         [ColumnName("shift_begin_time")]
