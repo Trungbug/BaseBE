@@ -19,9 +19,22 @@ builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 builder.Services.AddScoped<IShiftRepository, ShiftRepository>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.WithOrigins("*") // Cho phép t?t c? (ho?c "http://localhost:5173" cho an toàn h?n)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var app = builder.Build();
+
+
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -34,6 +47,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthorization();
 
