@@ -8,7 +8,7 @@ namespace Misa_FS.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ShiftController: MSBaseController<Shift>
+    public class ShiftController : MSBaseController<Shift>
     {
         private readonly IShiftService _shiftService;
         public ShiftController(IShiftService shiftService) : base(shiftService)
@@ -26,5 +26,16 @@ namespace Misa_FS.Controllers
             // Trả về ServiceResponse bọc PagedResult
             return Ok(ServiceResponse<PagedResult<ShiftDto>>.Ok(pagedResult, "Lấy dữ liệu thành công"));
         }
+        [HttpPut("bulk-status")]
+        public IActionResult BulkUpdateStatus([FromBody] BulkUpdateStatusDTO dto)
+        {
+            var result = _shiftService.UpdateMultipleStatus(dto.Ids, dto.Status);
+
+            // Sử dụng ServiceResponse có sẵn của bạn để trả về
+            return Ok(ServiceResponse<int>.Ok(result, $"Đã cập nhật trạng thái cho {result} bản ghi"));
+        }
+
+
+
     }
 }

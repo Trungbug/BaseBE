@@ -47,5 +47,12 @@ namespace Misa.demo.core.Interface.Repository
         /// <param name="id"></param>
         /// <returns>số bản ghi ảnh hường</returns>
         int Delete(Guid id);
+
+        /// <summary>
+        /// xóa nhiều bản ghi
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        int DeleteMany(List<Guid> ids);
     }
 }

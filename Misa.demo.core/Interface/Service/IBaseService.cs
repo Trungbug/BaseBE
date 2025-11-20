@@ -20,7 +20,7 @@ namespace Misa.demo.core.Interface.Service
 
         int Delete(Guid id);
 
-
+        int DeleteMany(List<Guid> ids);
 
     }
 }

@@ -11,5 +11,6 @@ namespace Misa.demo.core.Interface.Repository
     public interface IShiftRepository: IBaseRepo<Shift>
     {
         PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search);
+        int UpdateMultipleStatus(List<Guid> ids, int status);
     }
 }

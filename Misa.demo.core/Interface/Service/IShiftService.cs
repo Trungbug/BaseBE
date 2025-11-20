@@ -11,5 +11,6 @@ namespace Misa.demo.core.Interface.Service
     public interface IShiftService : IBaseService<Shift>
     {
         PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search);
+        int UpdateMultipleStatus(List<Guid> ids, int status);
     }
 }

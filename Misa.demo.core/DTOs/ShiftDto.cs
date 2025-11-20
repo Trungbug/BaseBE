@@ -26,5 +26,10 @@ namespace Misa.demo.core.DTOs
         /// Thời gian nghỉ (tính bằng giờ)
         /// </summary>
         public double BreakTimeHours { get; set; }
+
+        public string? CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }

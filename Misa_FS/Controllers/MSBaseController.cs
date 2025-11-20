@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Misa.demo.core.Interface.Service;
 using Misa.demo.core.DTOs;
+using Misa.demo.core.Interface.Service;
+using Misa.demo.core.Service;
 using static Misa.demo.core.DTOs.ServiceResponse<int>;
 
 namespace Misa_FS.Controllers
@@ -44,6 +45,13 @@ namespace Misa_FS.Controllers
         {
             var res = _baseService.Delete(id);
             return Ok(ServiceResponse<int>.Ok(res, "Xóa thành công"));
+        }
+
+        [HttpDelete("delete-many")]
+        public IActionResult DeleteMany([FromBody] List<Guid> ids)
+        {
+            var res = _baseService.DeleteMany(ids);
+            return Ok(ServiceResponse<int>.Ok(res, $"Đã xóa thành công {res} bản ghi"));
         }
     }
 }

@@ -243,6 +243,18 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
+        public int DeleteMany(List<Guid> ids)
+        {
+            using(var connection = GetOpenConnection())
+            {
+                var tableName = GetTableName();
+                var idColumn = GetPrimaryKeyColumnName();
+                var sql = $@"DELETE FROM {tableName} WHERE {idColumn} IN @Ids";
+                var res = connection.Execute(sql, new { Ids = ids });
+                return res;
+            }
+        }
+
         #endregion
     }
 }

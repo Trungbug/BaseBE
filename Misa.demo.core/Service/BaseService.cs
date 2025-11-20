@@ -95,5 +95,13 @@ namespace Misa.demo.core.Service
             }
         }
 
+        public int DeleteMany(List<Guid> ids)
+        {
+            if(ids == null || ids.Count == 0)
+            {
+                throw new ValidationException("Danh sách id xóa không được rỗng");
+            }
+            return _baseRepo.DeleteMany(ids);
+        }
     }
 }

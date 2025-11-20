@@ -25,5 +25,10 @@ namespace Misa.demo.core.Service
 
             return _shiftRepository.GetPaged(pageSize, pageNumber, search);
         }
+
+        public int UpdateMultipleStatus(List<Guid> ids, int status)
+        {
+            return _shiftRepository.UpdateMultipleStatus(ids, status);
+        }
     }
 }
