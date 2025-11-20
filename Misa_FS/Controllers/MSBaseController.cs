@@ -48,9 +48,14 @@ namespace Misa_FS.Controllers
         }
 
         [HttpDelete("delete-many")]
-        public IActionResult DeleteMany([FromBody] List<Guid> ids)
+        public IActionResult DeleteMany([FromBody] DeleteManyDTO dto)
         {
-            var res = _baseService.DeleteMany(ids);
+            if (dto == null || dto.Ids == null || dto.Ids.Count == 0)
+            {
+                return BadRequest(ServiceResponse<object>.Error("Danh sách id xóa không được để trống"));
+            }
+
+            var res = _baseService.DeleteMany(dto.Ids);
             return Ok(ServiceResponse<int>.Ok(res, $"Đã xóa thành công {res} bản ghi"));
         }
     }
