@@ -18,7 +18,7 @@ namespace Misa.demo.core.Interface.Repository
         /// <summary>
         /// lấy bản ghi theo id 
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Bản ghi</param>
         /// <returns>bản ghi theo id</returns>
         T Get(Guid id);
 
@@ -26,7 +26,7 @@ namespace Misa.demo.core.Interface.Repository
         /// <summary>
         /// thêm mới bản ghi
         /// </summary>
-        /// <param name="enity"></param>
+        /// <param name="enity">Dữ liệu cần thêm</param>
         /// <returns>số bản ghi ảnh hường</returns>
         int Insert(T enity);
 
@@ -35,24 +35,23 @@ namespace Misa.demo.core.Interface.Repository
         /// <summary>
         /// cập nhật bản ghi
         /// </summary>
-        /// <param name="enity"></param>
-        /// <param name="id"></param>
+        /// <param name="enity">Dữ liệu cần sửa</param>
+        /// <param name="id">Id dữ liệu cần sửa</param>
         /// <returns>số bản ghi ảnh hường</returns>
         int Update(T enity, Guid id);
-
 
         /// <summary>
         /// xóa 1 bản ghi
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Id dữ liệu cần xóa</param>
         /// <returns>số bản ghi ảnh hường</returns>
         int Delete(Guid id);
 
         /// <summary>
         /// xóa nhiều bản ghi
         /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
+        /// <param name="ids">Danh sách Id dữ liệu cần xóa</param>
+        /// <returns>Số bản ghi đã xóa</returns>
         int DeleteMany(List<Guid> ids);
     }
 }

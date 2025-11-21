@@ -15,6 +15,50 @@ namespace Misa.demo.core.Interface.Repository
     {
         public ShiftRepository(IConfiguration config) : base(config) { }
 
+
+        /// <summary>
+        /// Ham lay du lieu de xuat file
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns>danh sách file cần xuất</returns>
+        public IEnumerable<ShiftDto> GetExportData(string? search)
+        {
+            using (var connection = GetOpenConnection())
+            {
+                var whereClause = new StringBuilder();
+                var parameters = new DynamicParameters();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    whereClause.Append("WHERE (shift_code LIKE @Search OR shift_name LIKE @Search)");
+                    parameters.Add("@Search", $"%{search}%");
+                }
+
+                var sql = $@"
+            SELECT 
+                shift_id, shift_code, shift_name, 
+                shift_begin_time, shift_end_time, 
+                shift_begin_break_time, shift_end_break_time, 
+                shift_status AS ShiftStatus,
+                (TIMESTAMPDIFF(SECOND, shift_begin_time, shift_end_time) / 3600.0) AS WorkTimeHours,
+                COALESCE((TIMESTAMPDIFF(SECOND, shift_begin_break_time, shift_end_break_time) / 3600.0), 0) AS BreakTimeHours,
+                created_by, created_date, modified_by, modified_date
+            FROM shift
+            {whereClause}
+            ORDER BY shift_code ASC";
+
+                var data = connection.Query<ShiftDto>(sql, parameters);
+                return data;
+            }
+        }
+
+        /// <summary>
+        /// Phân trang và tìm kiếm ca làm việc
+        /// </summary>
+        /// <param name="pageSize">số ca 1 trang</param>
+        /// <param name="pageNumber">trang hiện tại</param>
+        /// <param name="search">từ khóa tìm kiếm</param>
+        /// <returns>danh sách ca làm việc</returns>
         public PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search)
         {
             using (var connection = GetOpenConnection())
@@ -67,6 +111,12 @@ namespace Misa.demo.core.Interface.Repository
             }
         }
 
+        /// <summary>
+        /// cập nhật trạng thái nhiều ca làm việc
+        /// </summary>
+        /// <param name="ids">danh sách id ca làm việc</param>
+        /// <param name="status">trạng thái cần sửa</param>
+        /// <returns>kết quả</returns>
         public int UpdateMultipleStatus(List<Guid> ids, int status)
         {
             if(ids == null || ids.Count == 0)

@@ -3,6 +3,7 @@ using Misa.demo.core.Interface.Service;
 using Misa.demo.core.Service;
 using Misa.infrsatructure.Repository;
 using Misa_FS.Middleware;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddCors(options =>
 });
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+//OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
 
 var app = builder.Build();
 
@@ -53,5 +55,6 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

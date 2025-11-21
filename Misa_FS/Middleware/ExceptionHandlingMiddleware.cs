@@ -10,12 +10,22 @@ namespace Misa_FS.Middleware
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
+        /// <summary>
+        /// Hàm tạo ExceptionHandlingMiddleware
+        /// </summary>
+        /// <param name="next"></param>
+        /// <param name="logger"></param>
         public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Hàm xử lý ngoại lệ
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
         public async Task InvokeAsync(HttpContext httpContext)
         {
             try
@@ -29,6 +39,12 @@ namespace Misa_FS.Middleware
             }
         }
 
+        /// <summary>
+        /// Hàm xử lý ngoại lệ và trả về phản hồi phù hợp
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="exception"></param>
+        /// <returns></returns>
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";

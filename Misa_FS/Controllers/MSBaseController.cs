@@ -19,6 +19,11 @@ namespace Misa_FS.Controllers
             _baseService = baseService;
         }
 
+        /// <summary>
+        /// Xử lý thêm mới bản ghi
+        /// </summary>
+        /// <param name="entity">Dữ liệu cần thêm</param>
+        /// <returns>Số bản ghi bị ảnh hưởng trong database </returns>
         [HttpPost]
         public IActionResult Post(T entity)
         {
@@ -33,6 +38,14 @@ namespace Misa_FS.Controllers
         //    return Ok(ServiceResponse<IEnumerable<T>>.Ok(data, "Lấy dữ liệu thành công"));
         //}
 
+
+
+        /// <summary>
+        /// xử lý cập nhật bản ghi
+        /// </summary>
+        /// <param name="entity">Dữ liệu thay đổi</param>
+        /// <param name="id">Id của bản ghi cần thay đổi</param>
+        /// <returns>Số bản ghi bị ảnh hưởng trong database </returns>
         [HttpPut("{id}")]
         public IActionResult Put([FromBody] T entity, [FromRoute] Guid id) 
         {
@@ -40,6 +53,11 @@ namespace Misa_FS.Controllers
             return Ok(ServiceResponse<int>.Ok(res, "Cập nhật thành công"));
         }
 
+        /// <summary>
+        /// API xóa 1 bản ghi (Delete)
+        /// </summary>
+        /// <param name="id">ID bản ghi cần xóa</param>
+        /// <returns>Số bản ghi bị ảnh hưởng</returns>
         [HttpDelete("{id}")]
         public IActionResult Delete(Guid id)
         {
@@ -47,6 +65,11 @@ namespace Misa_FS.Controllers
             return Ok(ServiceResponse<int>.Ok(res, "Xóa thành công"));
         }
 
+        /// <summary>
+        /// API xóa nhiều bản ghi cùng lúc
+        /// </summary>
+        /// <param name="dto">Danh sách ID cần xóa</param>
+        /// <returns>Số lượng bản ghi đã xóa</returns>
         [HttpDelete("delete-many")]
         public IActionResult DeleteMany([FromBody] DeleteManyDTO dto)
         {

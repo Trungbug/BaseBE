@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Misa.demo.core.DTOs
 {
+    /// <summary>
+    /// Chứa kết quả phân trang dùng chung.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class PagedResult<T>
     {
         /// <summary>

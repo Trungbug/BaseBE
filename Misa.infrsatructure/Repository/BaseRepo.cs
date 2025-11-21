@@ -15,7 +15,6 @@ namespace Misa.infrsatructure.Repository
         {
             _connectionString = config.GetConnectionString("ConnectionString");
         }
-
         protected MySqlConnection GetOpenConnection()
         {
             var connection = new MySqlConnection(_connectionString);
@@ -23,6 +22,10 @@ namespace Misa.infrsatructure.Repository
             return connection;
         }
 
+        /// <summary>
+        /// Lấy tất cả bản ghi
+        /// </summary>
+        /// <returns> Bản ghi</returns>
         public IEnumerable<T> GetAll()
         {
             using (var connection = GetOpenConnection())
@@ -34,6 +37,11 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
+        /// <summary>
+        /// Láy bản ghi theo Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Bản ghi</returns>
         public T Get(Guid id)
         {
             using (var connection = GetOpenConnection())
@@ -46,6 +54,12 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
+        /// <summary>
+        /// Thêm mới bản ghi
+        /// </summary>
+        /// <param name="entity">dữ liệu bản ghi</param>
+        /// <returns>Kết quả</returns>
+        /// <exception cref="ValidationException"></exception>
         public int Insert(T entity)
         {
             
@@ -97,6 +111,12 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
+        /// <summary>
+        /// Sửa bản ghi
+        /// </summary>
+        /// <param name="entity">Dữ liệu cần sủa</param>
+        /// <param name="id">id theo dữ liệu cần sửa</param>
+        /// <returns>kết quả</returns>
         public int Update(T entity, Guid id)
         {
             
@@ -130,6 +150,11 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
+        /// <summary>
+        /// Xóa bản ghi theo Id
+        /// </summary>
+        /// <param name="id">id bản ghi cần xóa</param>
+        /// <returns>kết quả</returns>
         public int Delete(Guid id)
         {
             using (var connection = GetOpenConnection())
@@ -142,8 +167,6 @@ namespace Misa.infrsatructure.Repository
                 return res;
             }
         }
-
-        #region Helper functions (Giống project tham khảo)
 
         /// <summary>
         /// Lấy tên bảng (từ Attribute [Table])
@@ -243,6 +266,11 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
+        /// <summary>
+        /// Xóa nhiều bản ghi
+        /// </summary>
+        /// <param name="ids">danh sách id cần xóa</param>
+        /// <returns></returns>
         public int DeleteMany(List<Guid> ids)
         {
             using(var connection = GetOpenConnection())
@@ -255,6 +283,5 @@ namespace Misa.infrsatructure.Repository
             }
         }
 
-        #endregion
     }
 }
