@@ -76,10 +76,10 @@ namespace Misa.demo.core.Service
             Get(id);
 
             Validate(entity, "Update");
-            if(entity.GetType().GetProperty("Id") == null)
-            {
-               throw new NotFoundException("Đối tượng không có thuộc tính Id");
-            }
+            //if(entity.GetType().GetProperty("Id") == null)
+            //{
+            //   throw new NotFoundException("Đối tượng không có thuộc tính Id");
+            //}
             return _baseRepo.Update(entity, id);
         }
 

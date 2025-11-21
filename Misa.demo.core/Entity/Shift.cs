@@ -95,5 +95,18 @@ namespace Misa.demo.core.Entity
         /// </summary>
         [ColumnName("modified_date")]
         public DateTime? ModifiedDate { get; set; }
+
+        // Thêm vào trong class Shift
+        /// <summary>
+        /// Thời gian làm việc (tính bằng giờ)
+        /// </summary>
+        [ColumnName("work_time_hours")]
+        public decimal WorkTimeHours { get; set; }
+
+        /// <summary>
+        /// Thời gian nghỉ (tính bằng giờ)
+        /// </summary>
+        [ColumnName("break_time_hours")]
+        public decimal BreakTimeHours { get; set; }
     }
 }

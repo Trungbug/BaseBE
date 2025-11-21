@@ -55,12 +55,12 @@ namespace Misa.demo.core.DTOs
         /// <summary>
         /// Thời gian làm việc (tính bằng giờ)
         /// </summary>
-        public double WorkTimeHours { get; set; }
+        public decimal WorkTimeHours { get; set; }
 
         /// <summary>
         /// Thời gian nghỉ (tính bằng giờ)
         /// </summary>
-        public double BreakTimeHours { get; set; }
+        public decimal BreakTimeHours { get; set; }
 
         /// <summary>
         /// Được tạo bởi
@@ -81,5 +81,7 @@ namespace Misa.demo.core.DTOs
         /// Ngày điều chỉnh
         /// </summary>
         public DateTime? ModifiedDate { get; set; }
+
+
     }
 }
