@@ -73,6 +73,11 @@ namespace Misa.demo.core.DTOs
         public DateTime CreatedDate { get; set; }
 
         /// <summary>
+        /// Mô tả ca làm việc
+        /// </summary>
+        public string? ShiftDescription { get; set; }
+
+        /// <summary>
         /// Được sửa bởi
         /// </summary>
         public string? ModifiedBy { get; set; }

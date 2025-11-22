@@ -86,12 +86,13 @@ namespace Misa.demo.core.Interface.Repository
                         created_by,
                         created_date,
                         modified_by,
-                        modified_date
+                        modified_date,
+                        shift_description
                     FROM 
                         shift
                     {whereClause}
-                    ORDER BY 
-                        shift_code ASC
+                   ORDER BY 
+                        created_date DESC
                     LIMIT @PageSize OFFSET @Offset";
 
                 parameters.Add("@PageSize", pageSize);
