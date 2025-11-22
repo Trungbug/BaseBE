@@ -17,13 +17,13 @@ namespace Misa.demo.core.Interface.Service
         /// <param name="pageNumber">trang hiện tại </param>
         /// <param name="search">ký tự tìm kiếm</param>
         /// <returns>kết quả trang trả về</returns>
-        PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search);
+        PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search, List<FilterCondition>? filters);
 
-        /// <summary>
-        /// cập nhật nhiều trạng thái ca làm việc
-        /// </summary>
-        /// <param name="ids">Danh sách ID ca làm việc</param>
-        /// <param name="status">trạng thái cần sửa thành</param>
+        /// <summary>                                                                                                                      
+        /// cập nhật nhiều trạng thái ca làm việc                                                                                          
+        /// /// </summary>                                                                                                       
+        /// <param name="ids">Danh sách ID ca làm việc</param>                                                                                                                         
+        /// <param name="status">trạng thái cần sửa thành</param>                                                                                                           
         /// <returns>số bản ghi cần sửa</returns>
         int UpdateMultipleStatus(List<Guid> ids, int status);
 

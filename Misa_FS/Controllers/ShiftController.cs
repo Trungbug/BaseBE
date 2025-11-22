@@ -3,6 +3,7 @@ using Misa.demo.core.DTOs;
 using Misa.demo.core.Entity;
 using Misa.demo.core.Interface.Service;
 using Misa.demo.core.Service;
+using System.Text.Json;
 
 namespace Misa_FS.Controllers
 {
@@ -27,15 +28,46 @@ namespace Misa_FS.Controllers
         /// <param name="search">Từ khóa tìm kiếm</param>
         /// <returns>PagedResult chứa danh sách ShiftDto</returns>
         [HttpGet]
+        /// <summary>
+        /// API lấy danh sách ca làm việc có phân trang + tìm kiếm + lọc nâng cao
+        /// </summary>
+        /// <param name="pageSize">Số bản ghi mỗi trang (Mặc định 10)</param>
+        /// <param name="pageNumber">Trang hiện tại (Mặc định 1)</param>
+        /// <param name="search">Từ khóa tìm kiếm chung (Mã hoặc Tên)</param>
+        /// <param name="filters">Chuỗi JSON chứa danh sách điều kiện lọc theo cột</param>
+        /// <returns>PagedResult chứa danh sách ShiftDto</returns>
+        [HttpGet]
         public IActionResult GetPaged(
             [FromQuery] int pageSize = 10,
             [FromQuery] int pageNumber = 1,
-            [FromQuery] string? search = null)
+            [FromQuery] string? search = null,
+            [FromQuery] string? filters = null)
         {
-            // Gọi service lấy dữ liệu phân trang
-            var pagedResult = _shiftService.GetPaged(pageSize, pageNumber, search);
+            
+            List<FilterCondition>? filterConditions = null;
 
-            // Trả về kiểu ServiceResponse theo chuẩn hệ thống
+            if (!string.IsNullOrEmpty(filters))
+            {
+                try
+                {
+                    
+                    filterConditions = JsonSerializer.Deserialize<List<FilterCondition>>(filters, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true 
+                    });
+                }
+                catch (Exception ex)
+                {
+                    
+                    Console.WriteLine($"Lỗi deserialize filter: {ex.Message}");
+                    filterConditions = new List<FilterCondition>();
+                }
+            }
+
+            // 4. Gọi Service để lấy dữ liệu
+            var pagedResult = _shiftService.GetPaged(pageSize, pageNumber, search, filterConditions);
+
+            // 5. Trả về kết quả chuẩn
             return Ok(ServiceResponse<PagedResult<ShiftDto>>.Ok(pagedResult, "Lấy dữ liệu thành công"));
         }
 

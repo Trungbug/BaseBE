@@ -77,12 +77,20 @@ namespace Misa.demo.core.Service
             }
         }
 
-        public PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search)
+
+        /// <summary>
+        /// hàm GetPaged để nhận filters
+        /// </summary>
+        /// <param name="pageSize"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="search"></param>
+        /// <param name="filters"></param>
+        /// <returns></returns>
+        public PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search, List<FilterCondition>? filters)
         {
             if (pageSize <= 0) pageSize = 10;
             if (pageNumber <= 0) pageNumber = 1;
-
-            return _shiftRepository.GetPaged(pageSize, pageNumber, search);
+            return _shiftRepository.GetPaged(pageSize, pageNumber, search, filters);
         }
 
         public int UpdateMultipleStatus(List<Guid> ids, int status)
