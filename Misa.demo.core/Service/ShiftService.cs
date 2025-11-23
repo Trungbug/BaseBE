@@ -27,7 +27,7 @@ namespace Misa.demo.core.Service
             var data = _shiftRepository.GetExportData(search);
 
             // 2. Cấu hình License cho EPPlus (bắt buộc nếu dùng bản mới)
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialPersonal("Truong Trung");
 
             // 3. Tạo file Excel
             using (var package = new ExcelPackage())
