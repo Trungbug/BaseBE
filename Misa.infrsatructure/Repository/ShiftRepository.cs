@@ -14,10 +14,10 @@ namespace Misa.demo.core.Interface.Repository
         public ShiftRepository(IConfiguration config) : base(config) { }
 
         /// <summary>
-        /// Ham lay du lieu de xuat file
+        /// Hàm lấy dữ liệu để xuất file Excel
         /// </summary>
-        /// <param name="search"></param>
-        /// <returns>danh sách file cần xuất</returns>
+        /// <param name="search">Từ khóa tìm kiếm</param>
+        /// <returns>Danh sách bản ghi để xuất Excel</returns>
         public IEnumerable<ShiftDto> GetExportData(string? search)
         {
             using var connection = GetOpenConnection();
@@ -43,10 +43,11 @@ namespace Misa.demo.core.Interface.Repository
         /// <summary>
         /// Phân trang và tìm kiếm ca làm việc
         /// </summary>
-        /// <param name="pageSize">số ca 1 trang</param>
-        /// <param name="pageNumber">trang hiện tại</param>
-        /// <param name="search">từ khóa tìm kiếm</param>
-        /// <returns>danh sách ca làm việc</returns>
+        /// <param name="pageSize">Số lượng bản ghi mỗi trang</param>
+        /// <param name="pageNumber">Trang hiện tại</param>
+        /// <param name="search">Từ khóa tìm kiếm</param>
+        /// <param name="filters">Các điều kiện lọc nâng cao</param>
+        /// <returns>Kết quả phân trang ca làm việc</returns>
         public PagedResult<ShiftDto> GetPaged(int pageSize, int pageNumber, string? search, List<FilterCondition>? filters)
         {
             using var connection = GetOpenConnection();
@@ -84,11 +85,11 @@ namespace Misa.demo.core.Interface.Repository
         }
 
         /// <summary>
-        /// cập nhật trạng thái nhiều ca làm việc
+        /// Cập nhật trạng thái cho nhiều ca làm việc
         /// </summary>
-        /// <param name="ids">danh sách id ca làm việc</param>
-        /// <param name="status">trạng thái cần sửa</param>
-        /// <returns>kết quả</returns>
+        /// <param name="ids">Danh sách ID cần cập nhật</param>
+        /// <param name="status">Trạng thái mới</param>
+        /// <returns>Số bản ghi bị ảnh hưởng</returns>
         public int UpdateMultipleStatus(List<Guid> ids, int status)
         {
             if (ids == null || ids.Count == 0)
@@ -101,10 +102,11 @@ namespace Misa.demo.core.Interface.Repository
             return connection.Execute(sql, new { Status = status, Ids = ids });
         }
 
-        // ============================================================
-        // =============  PRIVATE CLEAN HELPERS  ======================
-        // ============================================================
-
+        /// <summary>
+        /// Xây dựng câu điều kiện tìm kiếm (WHERE + parameters)
+        /// </summary>
+        /// <param name="search">Từ khóa tìm kiếm</param>
+        /// <returns>Tuple gồm câu WHERE và DynamicParameters</returns>
         private (StringBuilder where, DynamicParameters parameters) BuildSearchCondition(string? search)
         {
             var where = new StringBuilder("WHERE 1=1");
@@ -119,6 +121,12 @@ namespace Misa.demo.core.Interface.Repository
             return (where, parameters);
         }
 
+        /// <summary>
+        /// Thêm điều kiện lọc nâng cao vào câu WHERE
+        /// </summary>
+        /// <param name="filters">Danh sách điều kiện lọc</param>
+        /// <param name="where">Câu WHERE hiện tại</param>
+        /// <param name="parameters">Danh sách parameters</param>
         private void AppendFilterConditions(List<FilterCondition>? filters, StringBuilder where, DynamicParameters parameters)
         {
             if (filters == null || filters.Count == 0)
@@ -163,6 +171,9 @@ namespace Misa.demo.core.Interface.Repository
             }
         }
 
+        /// <summary>
+        /// Map tên cột từ FE sang tên cột DB
+        /// </summary>
         private static readonly Dictionary<string, string> ColumnMappings = new()
         {
             { "shiftCode", "shift_code" },
